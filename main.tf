@@ -16,7 +16,7 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "example" {
   name        = "terraform-test"
-  target_node = "proxmox-node"
+  target_node = "pve00"
 #  vmid        = 100
   memory      = 1024
   cores       = 1
