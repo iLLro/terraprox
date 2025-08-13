@@ -17,7 +17,7 @@ provider "proxmox" {
 resource "proxmox_vm_qemu" "example" {
   name        = "terraform-test"
   target_node = "proxmox-node"
-  vmid        = 100
+#  vmid        = 100
   memory      = 1024
   cores       = 1
   sockets     = 1
@@ -31,4 +31,5 @@ resource "proxmox_vm_qemu" "example" {
     bridge = "vmbr0"
   }
   os_type = "cloud-init"
-  clone   = "template-name"
+  clone   = "deb-templ"
+}  
