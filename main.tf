@@ -15,6 +15,7 @@ provider "proxmox" {
   password = "1qaz2wsx"
 }
 
+#creez template ubuntu
 
 resource "proxmox_virtual_environment_vm" "ubuntu_template" {
   name      = "ubuntu-template"
@@ -76,10 +77,86 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
   content_type = "snippets"
   datastore_id = "local"
   node_name    = "pve00"
-
-  # The 'user-data.yaml' file should be placed in the root of your Terraform module directory.
-  # It must contain valid cloud-init user data for VM initialization.
   source_file {
     path = "${path.module}/user-data.yaml"
   }
 }
+
+
+# Creez vm-uri din template vm-1 pana la vm-x
+
+variable "vm_count" {
+  type    = number
+  default = 2
+  description = "Number of VMs to create from the template"
+}
+
+resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
+  count     = var.vm_count
+  name      = "vm-${count.index + 1}"
+  node_name = "pve00"
+
+  clone {
+    vm_id = proxmox_virtual_environment_vm.ubuntu_template.id
+  }
+
+  cpu {
+    cores = 2
+  }
+
+  memory {
+    dedicated = 2048
+  }
+
+  initialization {
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+  }
+
+  network_device {
+    bridge = "vmbr0"
+  }
+}
+
+/**
+#creez vm-uri dupa o lista de nume
+variable "vm_names" {
+  type    = list(string)
+  default = ["vm1-tf", "vm2-tf"]
+  }
+
+resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
+  for_each  = toset(var.vm_names)
+
+  name      = each.value
+  node_name = "pve00"
+
+  clone {
+    vm_id = proxmox_virtual_environment_vm.ubuntu_template.id
+  }
+
+  cpu {
+    cores = 2
+  }
+
+  memory {
+    dedicated = 2048
+  }
+
+  initialization {
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+  }
+
+  network_device {
+    bridge = "vmbr0"
+  }
+}
+
+**/
