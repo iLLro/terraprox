@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "bpg/proxmox"
+      source  = "bpg/proxmox"
       version = "0.81.0"
     }
   }
@@ -70,7 +70,7 @@ resource "proxmox_virtual_environment_download_file" "ubuntu_cloud_image" {
   content_type = "iso"
   datastore_id = "local"
   node_name    = "pve00"
-  url = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
+  url          = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
 }
 
 resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
@@ -86,8 +86,8 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 # Creez vm-uri din template vm-1 pana la vm-x
 
 variable "vm_count" {
-  type    = number
-  default = 2
+  type        = number
+  default     = 4
   description = "Number of VMs to create from the template"
 }
 
@@ -98,6 +98,10 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
 
   clone {
     vm_id = proxmox_virtual_environment_vm.ubuntu_template.id
+  }
+
+  agent {
+    enabled = true
   }
 
   cpu {
