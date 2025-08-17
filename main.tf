@@ -168,7 +168,7 @@ output "vm_info" {
   value = [
     for vm in proxmox_virtual_environment_vm.ubuntu_vms : {
       name = vm.name
-      ip   = try(
+      ip = try(
         element([
           for iplist in vm.ipv4_addresses :
           iplist[0] if iplist[0] != "127.0.0.1"
