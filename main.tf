@@ -87,7 +87,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 
 variable "vm_count" {
   type        = number
-  default     = 4
+  default     = 10
   description = "Number of VMs to create from the template"
 }
 
@@ -164,3 +164,30 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
 }
 
 **/
+output "vm_info" {
+  value = [
+    for vm in proxmox_virtual_environment_vm.ubuntu_vms : {
+      name = vm.name
+      ip   = try(
+        element([
+          for iplist in vm.ipv4_addresses :
+          iplist[0] if iplist[0] != "127.0.0.1"
+        ], 0),
+        "no ip"
+      )
+    }
+  ]
+}
+
+output "vm_info_map" {
+  value = {
+    for vm in proxmox_virtual_environment_vm.ubuntu_vms :
+    vm.name => try(
+      element([
+        for iplist in vm.ipv4_addresses :
+        iplist[0] if iplist[0] != "127.0.0.1"
+      ], 0),
+      "no ip"
+    )
+  }
+}
