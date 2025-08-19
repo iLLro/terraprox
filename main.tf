@@ -87,7 +87,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 
 variable "vm_count" {
   type        = number
-  default     = 10
+  default     = 6
   description = "Number of VMs to create from the template"
 }
 
@@ -125,6 +125,27 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
   }
 }
 
+locals {
+  ubuntu_vm_inventory_hosts = [
+    for vm in proxmox_virtual_environment_vm.ubuntu_vms :
+    "${vm.name} ansible_host=${try(
+      element([
+        for iplist in vm.ipv4_addresses :
+        iplist[0] if iplist[0] != "127.0.0.1"
+      ], 0),
+      "no_ip"
+    )}"
+  ]
+}
+
+resource "local_file" "ansible_inventory" {
+  content = join("\n", concat(
+    ["[ubuntu_vms]"],
+    local.ubuntu_vm_inventory_hosts
+  ))
+  filename = "${path.module}/inventory.ini"
+}
+
 /**
 #creez vm-uri dupa o lista de nume
 variable "vm_names" {
@@ -132,7 +153,7 @@ variable "vm_names" {
   default = ["vm1-tf", "vm2-tf"]
   }
 
-resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
+resource "proxmox_virtual_environment_vm" "ubuntu_named_vms" {
   for_each  = toset(var.vm_names)
 
   name      = each.value
@@ -164,6 +185,7 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vms" {
 }
 
 **/
+
 output "vm_info" {
   value = [
     for vm in proxmox_virtual_environment_vm.ubuntu_vms : {
