@@ -87,7 +87,7 @@ resource "proxmox_virtual_environment_file" "user_data_cloud_config" {
 
 variable "vm_count" {
   type        = number
-  default     = 6
+  default     = 3
   description = "Number of VMs to create from the template"
 }
 
